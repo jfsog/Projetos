@@ -1,0 +1,13 @@
+5 rem soma 1 a x
+10 input x
+15 rem verifica y == x
+20 if y == x goto 60
+25 rem incrementa y
+30 let y = y + 1
+35 rem soma y ao total
+40 let t = t + y
+45 rem loop y
+50 goto 20
+55 rem imprime resultado
+60 print t
+99 end

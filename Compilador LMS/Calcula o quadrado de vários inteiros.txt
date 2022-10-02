@@ -1,0 +1,13 @@
+rem calcula o quadrado de vários inteiros
+input j
+rem
+rem verifica o valor sentinela
+if j == -9999 goto 99
+rem
+rem calcula o quadrado de j e atribui o resultado a k
+let k = j * j
+print k ^
+rem
+rem loop para obter o próximo j
+goto 20
+end

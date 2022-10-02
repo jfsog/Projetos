@@ -1,0 +1,10 @@
+let l=7
+let s=0
+if l<=0 goto 86
+input n
+let s = s + n
+let l = l - 1
+goto 81
+let w = s / 7
+print w
+end

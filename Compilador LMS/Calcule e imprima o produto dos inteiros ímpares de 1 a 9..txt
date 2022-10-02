@@ -1,0 +1,11 @@
+let q = 1
+let p = 1
+if q <= 9 goto 147
+goto 152
+if q % 2 == 1 goto 149
+goto 150
+let p = p * q
+let q = q + 1
+goto 145
+print q
+end

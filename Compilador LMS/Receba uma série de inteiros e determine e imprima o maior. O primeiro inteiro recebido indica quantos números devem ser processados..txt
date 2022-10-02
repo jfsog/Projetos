@@ -1,0 +1,16 @@
+input q
+let f = 0
+let m =0
+if q <=0 goto 106
+let q = q - 1
+input n
+if f != 0 goto 101
+let m = n
+let f = f + 1
+goto 95
+if n > m goto 104
+goto 95
+let m = n
+got 95
+print m
+end

@@ -1,0 +1,13 @@
+rem determina e imprime a soma de dois inteiros
+rem
+rem recebe os dois inteiros
+input a
+input b
+rem
+rem soma os inteiros e armazena o resultado em c
+let c = a + b
+rem
+rem imprime o resultado
+print c
+rem termina a execução do programa
+end

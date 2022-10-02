@@ -1,0 +1,154 @@
+#Instruções
+rem         50 rem isso e um comentário
+input       30 input x
+let         80 let u = 4 * ( j – 46 )
+print       10 print w
+goto        70 goto 45
+if / goto   35 if i == z goto 80
+end         99 end
+
+#Determina a soma de dois inteiros
+rem determina e imprime a soma de dois inteiros
+rem
+rem recebe os dois inteiros
+input a
+input b
+rem
+rem soma os inteiros e armazena o resultado em c
+let c = a + b
+rem
+rem imprime o resultado
+print c
+rem termina a execução do programa
+end
+
+#Encontra o maior entre dois inteiros
+rem determina o maior entre dois inteiros
+input s
+input t ^
+rem
+rem verifica se s >= t
+if s >= t goto 90
+rem
+rem t e maior que s, portanto imprime t
+print t
+goto 99
+em
+rem s e maior ou igual a t, portanto imprime s
+print s
+end
+
+
+#Calcula o quadrado de vários inteiros.
+rem calcula o quadrado de vários inteiros
+input j
+rem
+rem verifica o valor sentinela
+if j == -9999 goto 99
+rem
+rem calcula o quadrado de j e atribui o resultado a k
+let k = j * j
+print k ^
+rem
+rem loop para obter o próximo j
+goto 20
+end
+
+#12.27
+#a) Receber, somar e imprimir a média de três inteiros
+input a
+input b
+input c
+let d = (a + b +c)/3
+print d
+end
+
+#b)Use um loop controlado por sentinela para receber 10 inteiros e calcule e imprima sua soma.
+rem valor usado para controle do loop
+input a
+let s =0
+if a <=0 goto 75 rem #70
+input b
+let s = s + b
+let a = a-1
+goto 70
+print s rem #75
+end
+
+c) Use um loop controlado por contador para receber 7 inteiros, alguns positivos e outros negativos, e calcule e imprima sua média.
+let l=7
+let s=0
+if l<=0 goto 86
+input n
+let s = s + n
+let l = l - 1
+goto 81
+let w = s / 7
+print w
+end
+
+
+d) Receba uma série de inteiros e determine e imprima o maior. O primeiro inteiro recebido indica quantos números devem ser processados.
+#Receba uma série de inteiros e determine e imprima o maior. O primeiro inteiro recebido indica quantos números devem ser processados.
+input q
+let f = 0
+let m =0
+if q <=0 goto 106
+let q = q - 1
+input n
+if f != 0 goto 101
+let m = n
+let f = f + 1
+goto 95
+if n > m goto 104
+goto 95
+let m = n
+got 95
+print m
+end
+
+e) Receba 10 inteiros e imprima o menor.
+let f = 10
+let c = 0
+let m = 0;
+if f <= 0 goto 124
+let f = f -1
+input n
+if c != 0 goto 120
+let c = c + 1
+let m = n
+goto  113
+if n < m goto 122
+goto 113
+m = n
+goto 113
+print m
+end
+
+
+f) Calcule e imprima a soma dos inteiros pares de 2 a 30.
+let q =2
+let s = 0
+if q <= 30 goto 133
+goto 138
+if q % 2 == 0 goto 135
+goto 136
+let s = s + q
+let q = q + 1
+goto 131
+print s
+end
+
+
+g) Calcule e imprima o produto dos inteiros ímpares de 1 a 9.
+let q = 1
+let p = 1
+if q <= 9 goto 147
+goto 152
+if q % 2 == 1 goto 149
+goto 150
+let p = p * q
+let q = q + 1
+goto 145
+print q
+end

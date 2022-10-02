@@ -1,0 +1,11 @@
+let q =2
+let s = 0
+if q <= 30 goto 133
+goto 138
+if q % 2 == 0 goto 135
+goto 136
+let s = s + q
+let q = q + 1
+goto 131
+print s
+end

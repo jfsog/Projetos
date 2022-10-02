@@ -1,0 +1,45 @@
+/*
+    uso de variáveis globais
+*/
+int i,j;
+char ch;
+main(){
+    int i,j;/*Variáveis locais*/
+    puts("Programa de demonstração Little C.");
+    print_alfa();
+    do {
+        puts("Digite um número (0 para sair): ");
+        i=getnum();
+        if(i<0){
+            puts("Números têm de ser positivo, tente novamente!");
+        }else {
+            for ( j = 0 ; j < i ; j = j + 1 ) {
+                print(j);
+                print(" Somado é ");
+                print(sum(j));
+                puts(" fim");
+            }
+        }
+    }while(i!=0);
+}
+/*
+    Realiza o somatório entre 0 e o valor da variável 'num'
+*/
+sum(int num) {
+    int run;
+    run=0;
+    while(num){
+        run=run+num;
+        num=num-1;
+    }
+    return run;
+}
+/*
+    Printa na tela todas as letras do alfabeto em maiúscula
+*/
+print_alfa(){
+    for(ch='A';ch<='Z';ch=ch+1){
+        putch(ch);
+    }
+    puts("");
+}

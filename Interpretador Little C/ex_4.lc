@@ -1,0 +1,13 @@
+/*
+    demonstra recursão.
+*/
+main(){
+    print(fatorial(7)*2);
+}
+fatorial(int f){
+    if(f<2){
+        return 1;
+    }else {
+        return f * fatorial(f-1);
+    }
+}

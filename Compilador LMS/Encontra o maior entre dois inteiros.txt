@@ -1,0 +1,14 @@
+rem determina o maior entre dois inteiros
+input s
+input t ^
+rem
+rem verifica se s >= t
+if s >= t goto 90
+rem
+rem t e maior que s, portanto imprime t
+print t
+goto 99
+em
+rem s e maior ou igual a t, portanto imprime s
+print s
+end
