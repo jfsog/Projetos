@@ -187,7 +187,7 @@ void compila_simples_to_simpltron(void) {
       fclose(compilado);
       printf("\n");
    } else {
-      printf("A compilage faiou!\n");
+      printf("Erro ao compilar!\n");
    }
 }
 void EscreveNaMemoria(const int valor) {
