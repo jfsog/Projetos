@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <locale.h>
+#include <omp.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -20,6 +21,7 @@ typedef struct {
 typedef struct HuffmanNode {
   wchar_t letra;
   uint32_t frequencia;
+  uint32_t offset;
   struct HuffmanNode *parent;
   struct HuffmanNode *left;
   struct HuffmanNode *right;
@@ -64,20 +66,25 @@ StringBuilder *newStringBuilder() {
   novo->str = calloc(sizeof(wchar_t), novo->cap);
   return novo;
 }
-// Concatena uma "string" em um stringBuilder
+// Concatena uma wchar_t na stringBuilder
 void StringBuilderAppend(StringBuilder *strbuilder, wchar_t wc) {
-  if (strbuilder->sz + 1 >= strbuilder->cap) {
+  if (strbuilder->sz >= strbuilder->cap) {
+
     strbuilder->cap *= 2;
-    strbuilder->str =
-        realloc(strbuilder->str, sizeof(wchar_t) * strbuilder->cap);
+    wchar_t *temp = calloc(sizeof(wchar_t), strbuilder->cap);
+    for (uint32_t i = 0; i < strbuilder->sz; i++)
+      temp[i] = strbuilder->str[i];
+    free(strbuilder->str);
+    strbuilder->str = temp;
   }
-  // Operação simples possível de paralelizar
   strbuilder->str[strbuilder->sz++] = wc;
 }
+// Libera memória usada na estrutura da heap
 void ClearPriorityQueue(PriorityQueueHeap **heap) {
   free((*heap)->Nodes);
   free(*heap);
 }
+// Libera memória usada na árvore de huffman
 void ClearHuffmanTree(HuffmanNode *node) {
   if (!node)
     return;
@@ -85,6 +92,8 @@ void ClearHuffmanTree(HuffmanNode *node) {
   ClearHuffmanTree(node->right);
   free(node);
 }
+// Percorre a arvore de huffman recursivamente em pre-ordem adicionando cada
+// simbolo e sua respectiva frequencia em uma lista
 void GetFreqHelper(TreeNode *node, uint32_t *i, HuffmanNode **freq) {
   if (!node)
     return;
@@ -101,6 +110,7 @@ HuffmanNode **GetFreq(TreeMap *map) {
   GetFreqHelper(map->root, &i, freq);
   return freq;
 }
+// Insere um elemento na fila de prioridades
 void PriorityQueueInsert(PriorityQueueHeap *heap, HuffmanNode *k) {
   uint32_t s = heap->size++, f = s / 2;
   while (s > 0 && heap->Nodes[f]->frequencia > k->frequencia) {
@@ -110,6 +120,7 @@ void PriorityQueueInsert(PriorityQueueHeap *heap, HuffmanNode *k) {
   heap->Nodes[s] = k;
 }
 
+/* Recupera o no na arvore de huffamn que possui a menor frequencia */
 HuffmanNode *PriorityQueueGetMin(PriorityQueueHeap *heap) {
   if (heap->size == 0) {
     printf("Heap vazia\n");
@@ -147,7 +158,7 @@ void GenFrequencyOfSimbols(void) {
   ClearMap(&map);
 }
 void AtribuiCodigo(HuffmanNode *node) {
-  // O bit mais significativo marca o cumprimento do codigo
+  // O bit mais significativo marca o cumprimento do do codigo
   uint32_t c = 1U;
   HuffmanNode *t = node;
   while (t->parent != NULL) {
@@ -169,30 +180,50 @@ void GenHuffmanTree(void) {
   Root = PriorityQueueGetMin(heap);
   ClearPriorityQueue(&heap);
 }
+int CompareWchar(const void *a, const void *b) {
+  return *(wchar_t *)a - (*(HuffmanNode **)b)->letra;
+}
+HuffmanNode *SearchWcharSimbol(wchar_t wc) {
+  return *(HuffmanNode **)bsearch(&wc, Folhas, DictionarySize,
+                                  sizeof(HuffmanNode *), CompareWchar);
+}
+uint32_t GetCodeSize(HuffmanNode *nd) {
+  uint32_t t = 1;
+  while (nd->Codigo >> t > 1)
+    t++;
+  return t;
+}
 void GenBitSet() {
-  TreeMap *map = NewTreeMap();
-  for (uint32_t i = 0; i < DictionarySize; i++)
-    InsertTreeMap(map, Folhas[i]->letra, Folhas[i]->Codigo);
-  TreeNode *nd;
-  uint32_t cd;
-  uint64_t c = 0;
-  bitset = newBitSet();
+  bitset = calloc(sizeof(BitSet), 1);
+  uint32_t *codesize = calloc(sizeof(uint32_t), DictionarySize);
+  for (uint32_t i = 0; i < DictionarySize; i++) {
+    Folhas[i]->offset = i;
+    codesize[i] = GetCodeSize(Folhas[i]);
+  }
+  uint64_t sbits = 0;
+  /* Adicionar -openmp na build para dar suporte a biblioteca omp */
+#pragma omp parallel for reduction(+ : sbits)
   for (uint32_t i = 0; i <= message->sz; i++) {
-    if ((nd = GetFromMap(map, message->str[i])) == NULL) {
-      printf("Erro ao mapear cada letra em codigo\n");
-      exit(7);
-    }
-    cd = nd->value;
-    while (cd > 1) {
-      if (cd & 1UL)
-        BitsetPut(bitset, c);
-      cd >>= 1;
-      c++;
+    HuffmanNode *tn = SearchWcharSimbol(message->str[i]);
+    message->str[i] = tn->offset;
+    sbits += codesize[tn->offset];
+  }
+  free(codesize);
+  bitset->idx = sbits;
+  bitset->size = sbits / M_ULONG + 1;
+  bitset->bits = calloc(sizeof(uint64_t), bitset->size);
+  uint64_t widx = 0;
+  for (uint32_t i = 0; i <= message->sz; i++) {
+    uint32_t c = Folhas[message->str[i]]->Codigo;
+    while (c > 1) {
+      if (c & 1UL)
+        BitsetPut(bitset, widx);
+      c >>= 1;
+      widx++;
     }
   }
-  bitset->idx = c;
-  ClearMap(&map);
 }
+
 void WriteEncodedMessage(char *outputFile) {
   FILE *fp = fopen(outputFile, "wb");
   if (!fp) {
@@ -236,7 +267,6 @@ void EncodeMessage(char *inputFile, char *outputFile) {
   StringBuilderClear(&message);
   WriteEncodedMessage(outputFile);
 }
-
 void GenMessage(char *outputFile) {
   FILE *fp;
   if ((fp = fopen(outputFile, "w")) == NULL) {
@@ -247,9 +277,8 @@ void GenMessage(char *outputFile) {
   uint64_t i = 0;
   while (i < bitset->idx) {
     bool b = BitsetGet(bitset, i);
-    if (t->left == NULL && t->right == NULL) {
-      if (WEOF == fputwc(t->letra, fp))
-        exit(12);
+    if (t->right == NULL) {
+      fputwc(t->letra, fp);
       t = Root;
     }
     t = b ? t->right : t->left;
@@ -288,18 +317,12 @@ void DecodeMessage(char *inputFile, char *outputFile) {
   GenHuffmanTree();
   GenMessage(outputFile);
 }
-void printBitset(BitSet *set) {
-  for (uint64_t i = 0; i < set->size; i++) {
-    printf("%lu\n", set->bits[i]);
-  }
-  printf("\n");
-}
 int main(int argc, char *argv[]) {
   setlocale(LC_CTYPE, "");
   const char *erro_msg = {"Erro de sintaxe!\n\n\
-             \rExemplos de sintaxe:\n\
-             \r\n%s -e arquivo-para-codificar.txt destino.txt\n\
-             \r\n%s -d arquivo-codificado.txt     destino.txt\n"};
+             \rExemplos de sintaxe válida:\n\
+             \r\n%s -e arquivo-para-codificar.txt destino\n\
+             \r\n%s -d arquivo-codificado     destino.txt\n"};
   if (argc != 4) {
     printf(erro_msg, strrchr(argv[0], '/') + 1, strrchr(argv[0], '/') + 1);
     return 1;
