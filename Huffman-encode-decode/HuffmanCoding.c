@@ -147,7 +147,7 @@ void GenFrequencyOfSimbols(void) {
   ClearMap(&map);
 }
 void AtribuiCodigo(HuffmanNode *node) {
-  // O bit mais significativo marca o cumprimento do do codigo
+  // O bit mais significativo marca o cumprimento do codigo
   uint32_t c = 1U;
   HuffmanNode *t = node;
   while (t->parent != NULL) {
