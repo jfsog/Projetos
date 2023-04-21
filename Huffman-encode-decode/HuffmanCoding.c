@@ -1,6 +1,5 @@
 #include "BitSet.c"
 #include "RedBlackTreeMap.c"
-#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <locale.h>
@@ -201,7 +200,7 @@ void GenBitSet() {
     codesize[i] = GetCodeSize(Folhas[i]);
   }
   uint64_t sbits = 0;
-  /* Adicionar -openmp na build para dar suporte a biblioteca omp */
+/* Adicionar -openmp na build para dar suporte a biblioteca omp */
 #pragma omp parallel for reduction(+ : sbits)
   for (uint32_t i = 0; i <= message->sz; i++) {
     HuffmanNode *tn = SearchWcharSimbol(message->str[i]);
@@ -256,7 +255,7 @@ void EncodeMessage(char *inputFile, char *outputFile) {
   }
   message = newStringBuilder();
   wchar_t wc;
-  while ((wc = getwc(fp)) != EOF)
+  while ((wc = fgetwc(fp)) != EOF)
     StringBuilderAppend(message, wc);
   fclose(fp);
   GenFrequencyOfSimbols();
@@ -275,15 +274,32 @@ void GenMessage(char *outputFile) {
   }
   HuffmanNode *t = Root;
   uint64_t i = 0;
+  message = newStringBuilder();
   while (i < bitset->idx) {
     bool b = BitsetGet(bitset, i);
-    if (t->right == NULL) {
-      fputwc(t->letra, fp);
+    if (t->left == NULL && t->right == NULL) {
+      if (t->letra == '\0') {
+        if (message->sz > 0) {
+          fprintf(fp, "%ls", message->str);
+          wmemset(message->str, '\0', message->cap);
+          message->sz = 0;
+        }
+        fprintf(fp, "%lc", t->letra);
+      } else {
+        if (message->sz > 256) {
+          fprintf(fp, "%ls", message->str);
+          wmemset(message->str, '\0', message->cap);
+          message->sz = 0;
+        }
+        StringBuilderAppend(message, t->letra);
+      }
       t = Root;
     }
     t = b ? t->right : t->left;
     i++;
   }
+  if (message->sz > 0)
+    fprintf(fp, "%ls", message->str);
   fclose(fp);
   ClearBitSet(bitset);
   ClearHuffmanTree(Root);
@@ -318,7 +334,7 @@ void DecodeMessage(char *inputFile, char *outputFile) {
   GenMessage(outputFile);
 }
 int main(int argc, char *argv[]) {
-  setlocale(LC_CTYPE, "");
+  setlocale(LC_ALL, "");
   const char *erro_msg = {"Erro de sintaxe!\n\n\
              \rExemplos de sintaxe válida:\n\
              \r\n%s -e arquivo-para-codificar.txt destino\n\
